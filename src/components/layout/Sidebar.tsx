@@ -58,17 +58,29 @@ export function Sidebar() {
                 <div className="flex items-center gap-2 mb-2">
                     <span className="material-symbols-outlined text-secondary text-xl">extension</span>
                     <span className="text-xs font-semibold text-white">LinkedIn Extension</span>
+                    <span className="text-[10px] bg-secondary/20 text-secondary px-1.5 py-0.5 rounded-full font-mono font-bold ml-auto">v1.0.2</span>
                 </div>
                 <p className="text-xs text-slate-400 mb-3">
-                    Get real-time Hire Scores directly inside your LinkedIn job feed.
+                    Instant AI match scores and skill gaps directly in your Chrome toolbar.
                 </p>
-                <Link
-                    href="/settings"
-                    className="w-full inline-flex items-center justify-center gap-1.5 bg-white/10 hover:bg-white/20 text-white text-xs font-medium py-2 rounded-lg transition-colors border border-white/10"
-                >
-                    <span className="material-symbols-outlined text-sm">settings_ethernet</span>
-                    Extension Setup
-                </Link>
+                <div className="flex gap-2">
+                    <a
+                        href="/hireme-extension.zip"
+                        download="hireme-extension.zip"
+                        className="flex-1 inline-flex items-center justify-center gap-1.5 bg-secondary/20 hover:bg-secondary/30 text-secondary text-xs font-semibold py-2 rounded-lg transition-colors border border-secondary/30"
+                        title="Download Extension ZIP"
+                    >
+                        <span className="material-symbols-outlined text-sm">download</span>
+                        Get Extension
+                    </a>
+                    <Link
+                        href="/settings"
+                        className="px-2.5 inline-flex items-center justify-center bg-white/10 hover:bg-white/20 text-white text-xs py-2 rounded-lg transition-colors border border-white/10"
+                        title="Extension Setup & Guide"
+                    >
+                        <span className="material-symbols-outlined text-sm">help</span>
+                    </Link>
+                </div>
             </div>
         </aside>
     );

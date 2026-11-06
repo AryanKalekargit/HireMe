@@ -4,27 +4,34 @@ import { memoryStore } from '@/lib/memory-store';
 export const dynamic = 'force-dynamic';
 
 // CORS headers for Chrome Extension
-const CORS_HEADERS = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-};
-
-export async function OPTIONS() {
-    return new NextResponse(null, { status: 204, headers: CORS_HEADERS });
+function getCorsHeaders(req?: Request) {
+    const origin = req?.headers?.get('origin');
+    return {
+        'Access-Control-Allow-Origin': origin || '*',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-user-id',
+        ...(origin ? { 'Access-Control-Allow-Credentials': 'true' } : {}),
+    };
 }
 
-export async function GET() {
+export async function OPTIONS(req: Request) {
+    return new NextResponse(null, { status: 204, headers: getCorsHeaders(req) });
+}
+
+export async function GET(req: Request) {
+    const cors = getCorsHeaders(req);
     try {
-        let userId = '';
-        try {
-            const { getCurrentUserSession } = await import('@/lib/auth-server');
-            const session = await getCurrentUserSession();
-            if (session?.userId && session.userId !== 'user_guest') {
-                userId = session.userId;
+        let userId = req?.headers?.get('x-user-id') || '';
+        if (!userId) {
+            try {
+                const { getCurrentUserSession } = await import('@/lib/auth-server');
+                const session = await getCurrentUserSession();
+                if (session?.userId && session.userId !== 'user_guest') {
+                    userId = session.userId;
+                }
+            } catch {
+                // fallback
             }
-        } catch {
-            // fallback
         }
 
         if (!userId) {
@@ -90,13 +97,13 @@ export async function GET() {
                     recentAnalyses,
                 },
             },
-            { headers: CORS_HEADERS }
+            { headers: cors }
         );
     } catch (error: unknown) {
         const message = error instanceof Error ? error.message : 'Stats failed';
         return NextResponse.json(
             { success: false, error: message },
-            { status: 500, headers: CORS_HEADERS }
+            { status: 500, headers: cors }
         );
     }
 }

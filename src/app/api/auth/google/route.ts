@@ -65,11 +65,14 @@ export async function POST(req: Request) {
         }
 
         // Set session cookie
+        const isSecure = process.env.NODE_ENV === 'production' || (req.headers.get('x-forwarded-proto') === 'https');
         const res = NextResponse.json({ success: true, user: session });
         res.cookies.set('hireme_session', encodeURIComponent(JSON.stringify(session)), {
             httpOnly: false,
             path: '/',
-            sameSite: 'lax',
+            sameSite: isSecure ? 'none' : 'lax',
+            secure: isSecure,
+            maxAge: 60 * 60 * 24 * 30,
         });
 
         return res;

@@ -3,19 +3,24 @@ import { analyzeJobMatch } from '@/lib/matching-engine';
 import { memoryStore, MockJobAnalysis, MockSavedJob } from '@/lib/memory-store';
 
 // CORS headers – allows the Chrome Extension (LinkedIn origin) to call this API
-const CORS_HEADERS = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-user-id',
-};
+function getCorsHeaders(req?: Request) {
+    const origin = req?.headers?.get('origin');
+    return {
+        'Access-Control-Allow-Origin': origin || '*',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-user-id',
+        ...(origin ? { 'Access-Control-Allow-Credentials': 'true' } : {}),
+    };
+}
 
 // Handle CORS preflight request from Chrome Extension
-export async function OPTIONS() {
-    return new NextResponse(null, { status: 204, headers: CORS_HEADERS });
+export async function OPTIONS(req: Request) {
+    return new NextResponse(null, { status: 204, headers: getCorsHeaders(req) });
 }
 
 // Check if a job posting has already been evaluated by the currently logged-in user
 export async function GET(req: Request) {
+    const cors = getCorsHeaders(req);
     try {
         const { searchParams } = new URL(req.url);
         const queryUrl = (searchParams.get('url') || '').trim();
@@ -53,7 +58,7 @@ export async function GET(req: Request) {
         if (!activeUserId) {
             return NextResponse.json(
                 { success: true, alreadyEvaluated: false, message: 'Unauthenticated' },
-                { headers: CORS_HEADERS }
+                { headers: cors }
             );
         }
 
@@ -161,21 +166,22 @@ export async function GET(req: Request) {
                         notes: existingJob?.notes || existingJob?.description || '',
                     },
                 },
-                { headers: CORS_HEADERS }
+                { headers: cors }
             );
         }
 
         return NextResponse.json(
             { success: true, alreadyEvaluated: false, userId: activeUserId },
-            { headers: CORS_HEADERS }
+            { headers: cors }
         );
     } catch (err: unknown) {
         const message = err instanceof Error ? err.message : 'Check failed';
-        return NextResponse.json({ success: false, error: message }, { status: 500, headers: CORS_HEADERS });
+        return NextResponse.json({ success: false, error: message }, { status: 500, headers: cors });
     }
 }
 
 export async function POST(req: Request) {
+    const cors = getCorsHeaders(req);
     try {
         const body = await req.json();
         const rawTitle = body.title || body.jobTitle || '';
@@ -506,10 +512,10 @@ export async function POST(req: Request) {
                     },
                 },
             },
-            { headers: CORS_HEADERS }
+            { headers: cors }
         );
     } catch (error: unknown) {
         const message = error instanceof Error ? error.message : 'Analysis failed';
-        return NextResponse.json({ success: false, error: message }, { status: 500, headers: CORS_HEADERS });
+        return NextResponse.json({ success: false, error: message }, { status: 500, headers: cors });
     }
 }

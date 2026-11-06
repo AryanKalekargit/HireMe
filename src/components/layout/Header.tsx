@@ -50,6 +50,18 @@ export function Header({ title = 'Dashboard' }: { title?: string }) {
             </div>
 
             <div className="flex items-center gap-3.5">
+                {/* Download Chrome Extension Button */}
+                <a
+                    href="/hireme-extension.zip"
+                    download="hireme-extension.zip"
+                    className="inline-flex items-center gap-1.5 bg-secondary/15 hover:bg-secondary/25 text-secondary border border-secondary/30 text-xs font-semibold px-3 py-1.5 rounded-xl transition-all active:scale-95 shadow-sm"
+                    title="Download Chrome Extension (v1.0.2)"
+                >
+                    <span className="material-symbols-outlined text-sm">extension</span>
+                    <span className="hidden md:inline">Chrome Extension</span>
+                    <span className="md:hidden">Extension</span>
+                </a>
+
                 {/* Quick Analyze Button */}
                 <Link
                     href="/dashboard#quick-analyze"

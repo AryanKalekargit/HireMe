@@ -1,8 +1,28 @@
 // extension/popup.js
 // HireMe AI Extension Popup Controller – Supports Per-User Duplicate Alerts & Live Sync
 
-const API = 'http://localhost:3000';
+const API = 'https://hireme-aryan.vercel.app';
 let currentScrapedJob = null;
+
+// Helper: Read active user session directly from Chrome cookie jar
+async function getActiveUserSession() {
+  return new Promise((resolve) => {
+    if (typeof chrome !== 'undefined' && chrome.cookies && chrome.cookies.get) {
+      chrome.cookies.get({ url: API, name: 'hireme_session' }, (cookie) => {
+        if (cookie && cookie.value) {
+          try {
+            const user = JSON.parse(decodeURIComponent(cookie.value));
+            resolve(user);
+            return;
+          } catch {}
+        }
+        resolve(null);
+      });
+    } else {
+      resolve(null);
+    }
+  });
+}
 
 function getScoreColor(score) {
   if (score >= 80) return '#34d399';
@@ -39,12 +59,19 @@ async function loadServerStats() {
   const statScore = document.getElementById('stat-score');
 
   try {
-    const res = await fetch(`${API}/api/extension-stats`, { credentials: 'include' });
+    const session = await getActiveUserSession();
+    const reqHeaders = {};
+    if (session?.userId) reqHeaders['x-user-id'] = session.userId;
+
+    const res = await fetch(`${API}/api/extension-stats`, {
+      headers: reqHeaders,
+      credentials: 'include',
+    });
     const data = await res.json();
 
     if (!data.success) {
       if (authBadge) {
-        authBadge.textContent = '🔒 Sign in at :3000';
+        authBadge.textContent = '🔒 Sign in at hireme-aryan.vercel.app';
         authBadge.className = 'badge badge-purple';
         authBadge.style.color = '#f59e0b';
       }
@@ -233,10 +260,17 @@ async function renderDetectedJob(job) {
 
     // Check if ALREADY Evaluated by this specific logged-in user
     try {
+      const session = await getActiveUserSession();
+      const reqHeaders = {};
+      if (session?.userId) reqHeaders['x-user-id'] = session.userId;
+
       const canonicalUrl = job.url || getCanonicalUrlFromTab(window.location.href);
       const res = await fetch(
         `${API}/api/analyze-job?url=${encodeURIComponent(canonicalUrl)}&title=${encodeURIComponent(job.title)}&company=${encodeURIComponent(job.company || '')}`,
-        { credentials: 'include' }
+        {
+          headers: reqHeaders,
+          credentials: 'include',
+        }
       );
       const checkData = await res.json();
 
@@ -295,9 +329,13 @@ async function handleEvaluateClick() {
       location,
     };
 
+    const session = await getActiveUserSession();
+    const reqHeaders = { 'Content-Type': 'application/json' };
+    if (session?.userId) reqHeaders['x-user-id'] = session.userId;
+
     const res = await fetch(`${API}/api/analyze-job`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: reqHeaders,
       credentials: 'include',
       body: JSON.stringify(payload),
     });
@@ -305,7 +343,7 @@ async function handleEvaluateClick() {
     const data = await res.json();
 
     if (!res.ok || !data.success) {
-      alert(data.error || 'Failed to analyze job. Please make sure you are signed in at http://localhost:3000');
+      alert(data.error || 'Failed to analyze job. Please make sure you are signed in at https://hireme-aryan.vercel.app');
       if (evalBtn) {
         evalBtn.disabled = false;
         evalBtn.textContent = '✨ Retry Job Evaluation';
@@ -338,9 +376,11 @@ async function handleEvaluateClick() {
 
   } catch (err) {
     console.error('Analysis error:', err);
-    alert('Could not connect to HireMe server. Ensure localhost:3000 is running.');
+    alert('Could not connect to HireMe server. Ensure https://hireme-aryan.vercel.app is accessible.');
     if (evalBtn) {
       evalBtn.disabled = false;
+      evalBtn.textContent = '✨ Evaluate Current Job Posting';
+    }
       evalBtn.textContent = '✨ Evaluate Current Job Posting';
     }
   }

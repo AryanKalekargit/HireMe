@@ -1,16 +1,18 @@
 {
     "manifest_version": 3,
     "name": "HireMe - AI Job Assistant for LinkedIn",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "description": "Instant AI Resume Match & Hire Score assistant for LinkedIn Job Postings.",
     "permissions": [
         "activeTab",
         "tabs",
         "scripting",
-        "storage"
+        "storage",
+        "cookies"
     ],
     "host_permissions": [
         "https://*.linkedin.com/*",
+        "https://hireme-aryan.vercel.app/*",
         "http://localhost:3000/*"
     ],
     "icons": {

@@ -72,14 +72,22 @@ export default function LandingPage() {
                             Get Started Free
                             <span className="material-symbols-outlined text-sm">arrow_forward</span>
                         </Link>
+                        <a
+                            href="/hireme-extension.zip"
+                            download="hireme-extension.zip"
+                            className="w-full sm:w-auto glass-panel border border-secondary/30 text-secondary px-6 py-3.5 rounded-xl font-semibold text-sm hover:bg-secondary/10 transition-all active:scale-95 flex items-center justify-center gap-2 shadow-sm"
+                        >
+                            <span className="material-symbols-outlined text-sm">extension</span>
+                            Download Extension (.zip)
+                        </a>
                         <Link
                             href="/tracker"
-                            className="w-full sm:w-auto glass-panel text-on-surface px-8 py-3.5 rounded-xl font-semibold text-sm hover:bg-white/10 transition-all active:scale-95 flex items-center justify-center gap-2"
+                            className="w-full sm:w-auto glass-panel text-on-surface px-6 py-3.5 rounded-xl font-semibold text-sm hover:bg-white/10 transition-all active:scale-95 flex items-center justify-center gap-2"
                         >
                             <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>
                                 table_chart
                             </span>
-                            View Demo Tracker
+                            View Tracker
                         </Link>
                     </div>
 
@@ -160,16 +168,29 @@ export default function LandingPage() {
                             </p>
                         </div>
 
-                        <div className="glass-panel rounded-2xl p-8 transition-all hover:-translate-y-1 hover:border-secondary/40">
-                            <div className="w-12 h-12 rounded-xl bg-teal-500/10 flex items-center justify-center text-secondary mb-6 border border-teal-500/20">
-                                <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>
-                                    extension
-                                </span>
+                        <div id="extension" className="glass-panel rounded-2xl p-8 transition-all hover:-translate-y-1 hover:border-secondary/40 flex flex-col justify-between">
+                            <div>
+                                <div className="w-12 h-12 rounded-xl bg-teal-500/10 flex items-center justify-center text-secondary mb-6 border border-teal-500/20">
+                                    <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>
+                                        extension
+                                    </span>
+                                </div>
+                                <div className="flex items-center justify-between mb-3">
+                                    <h3 className="font-bold text-xl text-white">LinkedIn Extension</h3>
+                                    <span className="text-xs bg-secondary/20 text-secondary px-2 py-0.5 rounded-full font-mono font-bold">v1.0.2</span>
+                                </div>
+                                <p className="text-sm text-slate-400 leading-relaxed mb-6">
+                                    Manifest V3 Chrome Extension analyzes job postings directly from your Chrome toolbar — showing instant Hire Scores, CTC/Stipend, and recruiter contacts.
+                                </p>
                             </div>
-                            <h3 className="font-bold text-xl text-white mb-3">LinkedIn Extension</h3>
-                            <p className="text-sm text-slate-400 leading-relaxed">
-                                Manifest V3 Chrome Extension analyzes job postings directly from your Chrome toolbar — showing instant Hire Scores, CTC/Stipend, and recruiter contacts.
-                            </p>
+                            <a
+                                href="/hireme-extension.zip"
+                                download="hireme-extension.zip"
+                                className="w-full inline-flex items-center justify-center gap-2 bg-secondary/15 hover:bg-secondary/25 text-secondary border border-secondary/30 text-xs font-bold py-2.5 px-4 rounded-xl transition-all shadow-sm active:scale-95"
+                            >
+                                <span className="material-symbols-outlined text-sm">download</span>
+                                Download Extension (.zip)
+                            </a>
                         </div>
 
                         <div className="glass-panel rounded-2xl p-8 transition-all hover:-translate-y-1 hover:border-warning/40">
