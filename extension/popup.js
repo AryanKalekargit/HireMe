@@ -7,18 +7,27 @@ let currentScrapedJob = null;
 // Helper: Read active user session directly from Chrome cookie jar
 async function getActiveUserSession() {
   return new Promise((resolve) => {
-    if (typeof chrome !== 'undefined' && chrome.cookies && chrome.cookies.get) {
-      chrome.cookies.get({ url: API, name: 'hireme_session' }, (cookie) => {
-        if (cookie && cookie.value) {
-          try {
-            const user = JSON.parse(decodeURIComponent(cookie.value));
-            resolve(user);
+    try {
+      if (typeof chrome !== 'undefined' && chrome.cookies && chrome.cookies.get) {
+        chrome.cookies.get({ url: API, name: 'hireme_session' }, (cookie) => {
+          if (chrome.runtime?.lastError) {
+            resolve(null);
             return;
-          } catch {}
-        }
+          }
+          if (cookie && cookie.value) {
+            try {
+              const user = JSON.parse(decodeURIComponent(cookie.value));
+              resolve(user);
+              return;
+            } catch {}
+          }
+          resolve(null);
+        });
+        setTimeout(() => resolve(null), 1000);
+      } else {
         resolve(null);
-      });
-    } else {
+      }
+    } catch {
       resolve(null);
     }
   });
@@ -63,17 +72,25 @@ async function loadServerStats() {
     const reqHeaders = {};
     if (session?.userId) reqHeaders['x-user-id'] = session.userId;
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 6000);
+
     const res = await fetch(`${API}/api/extension-stats`, {
       headers: reqHeaders,
       credentials: 'include',
+      signal: controller.signal,
     });
+    clearTimeout(timeoutId);
+
     const data = await res.json();
 
     if (!data.success) {
       if (authBadge) {
-        authBadge.textContent = '🔒 Sign in at hireme-aryan.vercel.app';
+        authBadge.textContent = '🔒 Sign in at hireme';
         authBadge.className = 'badge badge-purple';
         authBadge.style.color = '#f59e0b';
+        authBadge.style.cursor = 'pointer';
+        authBadge.onclick = () => window.open(`${API}/login`, '_blank');
       }
       if (statJobs) statJobs.textContent = '—';
       if (statScore) statScore.textContent = '—';
@@ -95,7 +112,7 @@ async function loadServerStats() {
     }
   } catch (err) {
     if (authBadge) {
-      authBadge.textContent = '⚠️ Server Offline';
+      authBadge.textContent = '⚠️ Offline / Unreachable';
       authBadge.className = 'badge';
       authBadge.style.color = '#f87171';
     }
@@ -148,10 +165,15 @@ async function checkActiveTab() {
       tabPill.className = 'badge badge-green';
     }
 
-    // Try messaging the content script
+    // Instant Preview: Detect from URL & Tab Title so UI is never stuck on "Detecting..."
+    if (activeTab.title && (activeTab.title.includes('| LinkedIn') || activeTab.url.includes('/jobs/'))) {
+      fallbackUrlDetection(activeTab.url, activeTab.title);
+    }
+
+    // Try messaging the content script for full details (description, location, etc.)
     chrome.tabs.sendMessage(activeTab.id, { action: 'SCRAPE_JOB' }, async (response) => {
       if (chrome.runtime.lastError || !response || !response.title) {
-        // Content script might not be injected yet, try injecting scraper scripts
+        // Content script might not be injected yet on this tab, inject scraper scripts
         try {
           if (chrome.scripting && chrome.scripting.executeScript) {
             await chrome.scripting.executeScript({
@@ -172,18 +194,13 @@ async function checkActiveTab() {
                 if (secondResp && secondResp.title) {
                   currentScrapedJob = secondResp;
                   renderDetectedJob(secondResp);
-                } else {
-                  fallbackUrlDetection(activeTab.url, activeTab.title);
                 }
               });
             }, 300);
-            return;
           }
         } catch (e) {
           console.warn('Script injection error:', e);
         }
-
-        fallbackUrlDetection(activeTab.url, activeTab.title);
         return;
       }
 
@@ -379,8 +396,6 @@ async function handleEvaluateClick() {
     alert('Could not connect to HireMe server. Ensure https://hireme-aryan.vercel.app is accessible.');
     if (evalBtn) {
       evalBtn.disabled = false;
-      evalBtn.textContent = '✨ Evaluate Current Job Posting';
-    }
       evalBtn.textContent = '✨ Evaluate Current Job Posting';
     }
   }
