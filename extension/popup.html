@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>HireMe AI Assistant</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      width: 330px;
+      background: #0c1322;
+      color: #f8fafc;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 12px;
+      overflow-x: hidden;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(19, 27, 43, 0.8);
+    }
+
+    .logo {
+      width: 26px;
+      height: 26px;
+      border-radius: 7px;
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      flex-shrink: 0;
+    }
+
+    .header h2 {
+      font-size: 14px;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .header .version {
+      font-size: 9px;
+      color: #818cf8;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      margin-left: auto;
+    }
+
+    /* Status row */
+    .status-row {
+      display: flex;
+      gap: 6px;
+      padding: 8px 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      background: rgba(15, 23, 42, 0.6);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      border-radius: 20px;
+      font-size: 10px;
+      font-weight: 600;
+    }
+
+    .badge-green {
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #34d399;
+    }
+
+    .badge-purple {
+      background: rgba(79, 70, 229, 0.12);
+      border: 1px solid rgba(79, 70, 229, 0.3);
+      color: #818cf8;
+    }
+
+    .badge-sky {
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      color: #38bdf8;
+    }
+
+    .dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    /* Live Job Detection & Evaluation Box */
+    .eval-box {
+      margin: 12px 14px;
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.9) 100%);
+      border: 1px solid rgba(99, 102, 241, 0.25);
+      border-radius: 12px;
+      padding: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .eval-box-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .eval-box-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #a5b4fc;
+    }
+
+    .job-preview {
+      margin-bottom: 10px;
+    }
+
+    .job-preview-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.3;
+      margin-bottom: 2px;
+    }
+
+    .job-preview-company {
+      font-size: 11px;
+      color: #94a3b8;
+    }
+
+    .btn-evaluate {
+      width: 100%;
+      background: linear-gradient(135deg, #4f46e5, #6366f1);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 9px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      box-shadow: 0 2px 8px rgba(79, 70, 229, 0.4);
+      transition: all 0.2s;
+    }
+
+    .btn-evaluate:hover {
+      background: linear-gradient(135deg, #4338ca, #4f46e5);
+    }
+
+    .btn-evaluate:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Live Evaluation Results */
+    .eval-result-card {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .score-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .score-circle {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      font-weight: 800;
+      background: rgba(52, 211, 153, 0.15);
+      border: 2px solid #34d399;
+      color: #34d399;
+      flex-shrink: 0;
+    }
+
+    .skills-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 4px;
+    }
+
+    .chip {
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 10px;
+      font-weight: 600;
+    }
+
+    .chip-green {
+      background: rgba(52, 211, 153, 0.12);
+      border: 1px solid rgba(52, 211, 153, 0.25);
+      color: #34d399;
+    }
+
+    .chip-red {
+      background: rgba(248, 113, 113, 0.12);
+      border: 1px solid rgba(248, 113, 113, 0.25);
+      color: #f87171;
+    }
+
+    .auto-save-pill {
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      color: #34d399;
+      padding: 6px 8px;
+      border-radius: 6px;
+      font-size: 10px;
+      font-weight: 600;
+      margin-top: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* Stats Grid */
+    .section-title {
+      padding: 8px 16px 4px;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      color: #64748b;
+      text-transform: uppercase;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      padding: 0 14px 10px;
+    }
+
+    .stat-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 10px;
+      padding: 8px 10px;
+    }
+
+    .stat-value {
+      font-size: 18px;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .stat-label {
+      font-size: 10px;
+      color: #64748b;
+      margin-top: 2px;
+    }
+
+    /* Footer */
+    .footer {
+      padding: 8px 14px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .btn {
+      display: block;
+      width: 100%;
+      text-align: center;
+      text-decoration: none;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 8px;
+      border-radius: 8px;
+    }
+
+    .btn-primary {
+      background: #4f46e5;
+      color: #fff;
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.06);
+      color: #cbd5e1;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Header -->
+  <div class="header">
+    <div class="logo" style="background:transparent; overflow:hidden;">
+      <img src="icons/icon32.png" width="26" height="26" style="border-radius:7px; object-fit:contain;" alt="HireMe" />
+    </div>
+    <h2>HireMe AI</h2>
+    <span class="version">v2.0</span>
+  </div>
+
+  <!-- Status -->
+  <div class="status-row">
+    <span class="badge badge-green"><span class="dot"></span>Extension Ready</span>
+    <span class="badge badge-purple" id="auth-badge">🔄 Checking Server…</span>
+  </div>
+
+  <!-- LIVE JOB DETECTION & EVALUATION BOX -->
+  <div class="eval-box" id="live-eval-box">
+    <div class="eval-box-header">
+      <span class="eval-box-title">⚡ LinkedIn Job Evaluator</span>
+      <span id="tab-pill" class="badge badge-sky">Scanning Tab…</span>
+    </div>
+
+    <div id="eval-prompt">
+      <div class="job-preview">
+        <div id="scraped-job-title" class="job-preview-title">Detecting LinkedIn job posting…</div>
+        <div id="scraped-job-company" class="job-preview-company">Please open or click on any job on LinkedIn</div>
+      </div>
+      <button id="btn-evaluate-job" class="btn-evaluate">
+        ✨ Evaluate Current Job Posting
+      </button>
+    </div>
+
+    <!-- Live Result Container (hidden until analyzed) -->
+    <div id="eval-result-card" class="eval-result-card" style="display:none;">
+      <div class="score-row">
+        <div class="score-circle" id="result-score-circle">--</div>
+        <div>
+          <div style="font-weight:700; font-size:12px; color:#fff;" id="result-score-label">Calculating…</div>
+          <div style="font-size:10px; color:#94a3b8;" id="result-job-meta">—</div>
+        </div>
+      </div>
+
+      <!-- Opportunity Type & Compensation / Stipend -->
+      <div id="result-type-badge-row" style="display:flex; align-items:center; justify-content:space-between; margin-top:8px; padding:6px 8px; border-radius:6px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); font-size:10px;">
+        <span id="result-emp-type" style="font-weight:700; color:#c084fc; background:rgba(192,132,252,0.15); border:1px solid rgba(192,132,252,0.3); padding:2px 6px; border-radius:4px;">Internship</span>
+        <span id="result-compensation" style="color:#fcd34d; font-weight:700;">Stipend : ₹25,000 / month</span>
+      </div>
+
+      <div style="font-size:10px; font-weight:700; color:#34d399; margin-top:6px;">MATCHED SKILLS:</div>
+      <div class="skills-chips" id="result-matched-skills"></div>
+
+      <div style="font-size:10px; font-weight:700; color:#f87171; margin-top:6px;">MISSING SKILLS:</div>
+      <div class="skills-chips" id="result-missing-skills"></div>
+
+      <div class="auto-save-pill">
+        <span>✓ Saved to Tracker as &quot;Matched&quot;</span>
+        <a href="http://localhost:3000/tracker" target="_blank" style="color:#38bdf8; text-decoration:underline;">Open Tracker</a>
+      </div>
+
+      <button id="btn-copy-job-link" style="width:100%; margin-top:8px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:#cbd5e1; font-size:10px; font-weight:600; padding:6px; border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:5px;">
+        📋 Copy LinkedIn Job Link
+      </button>
+    </div>
+  </div>
+
+  <!-- Lifetime Activity Stats -->
+  <div class="section-title">📊 Lifetime Evaluations</div>
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-value" id="stat-today">—</div>
+      <div class="stat-label">Jobs Evaluated</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="stat-score">—</div>
+      <div class="stat-label">Avg Hire Score</div>
+    </div>
+  </div>
+
+  <!-- Footer buttons -->
+  <div class="footer">
+    <a href="http://localhost:3000/tracker" target="_blank" class="btn btn-primary">Open Opportunity Tracker →</a>
+    <a href="http://localhost:3000/dashboard" target="_blank" class="btn btn-secondary">Open Web Dashboard</a>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+
+</html>
