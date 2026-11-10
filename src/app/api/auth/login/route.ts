@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import mongoose from 'mongoose';
 import { memoryStore } from '@/lib/memory-store';
 import { PRESET_USERS } from '@/lib/auth-server';
 import { connectToDatabase, isMongoConnected } from '@/lib/mongodb';
@@ -14,7 +15,9 @@ export async function POST(req: Request) {
             return NextResponse.json({ success: false, error: 'Valid email required' }, { status: 400 });
         }
 
-        await connectToDatabase();
+        const conn = await connectToDatabase();
+        const mongoState = mongoose.connection.readyState;
+        const mongoErr = (global as any).__lastMongoError || null;
 
         let matchedUser: any = null;
 
@@ -82,7 +85,13 @@ export async function POST(req: Request) {
 
         if (!matchedUser) {
             return NextResponse.json(
-                { success: false, error: 'Account not found. Please click Create account first to sign up.' },
+                {
+                    success: false,
+                    error: 'Account not found. Please click Create account first to sign up.',
+                    dbConnected: isMongoConnected(),
+                    dbState: mongoose.connection.readyState,
+                    dbError: (global as any).__lastMongoError || null
+                },
                 { status: 404 }
             );
         }

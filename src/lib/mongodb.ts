@@ -43,6 +43,7 @@ export async function connectToDatabase(): Promise<typeof mongoose | null> {
             })
             .catch((err) => {
                 console.warn('[HireMe] MongoDB offline or unreachable – operating seamlessly with memory store:', err.message);
+                (global as any).__lastMongoError = err.message;
                 cached!.promise = null;
                 return null;
             });
