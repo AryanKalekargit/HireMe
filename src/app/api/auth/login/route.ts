@@ -31,6 +31,14 @@ export async function POST(req: Request) {
                         );
                     }
 
+                    // If user had no password set previously, save this password for them
+                    if (!dbUser.passwordHash && password) {
+                        try {
+                            dbUser.passwordHash = password;
+                            await dbUser.save();
+                        } catch {}
+                    }
+
                     matchedUser = {
                         userId: dbUser.clerkId || `user_${email.replace(/[^a-z0-9]/g, '_')}`,
                         email: dbUser.email,

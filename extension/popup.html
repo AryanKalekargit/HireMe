@@ -325,7 +325,10 @@
   <div class="eval-box" id="live-eval-box">
     <div class="eval-box-header">
       <span class="eval-box-title">⚡ LinkedIn Job Evaluator</span>
-      <span id="tab-pill" class="badge badge-sky">Scanning Tab…</span>
+      <div style="display:flex; align-items:center; gap:6px;">
+        <span id="tab-pill" class="badge badge-sky">Scanning Tab…</span>
+        <button id="btn-rescan-tab" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); color:#a5b4fc; font-size:10px; font-weight:600; padding:2px 7px; border-radius:12px; cursor:pointer;" title="Re-scan current tab">⟳ Rescan</button>
+      </div>
     </div>
 
     <div id="eval-prompt">
@@ -386,8 +389,8 @@
 
   <!-- Footer buttons -->
   <div class="footer">
-    <a href="https://hireme-aryan.vercel.app/tracker" target="_blank" class="btn btn-primary">Open Opportunity Tracker →</a>
-    <a href="https://hireme-aryan.vercel.app/dashboard" target="_blank" class="btn btn-secondary">Open Web Dashboard</a>
+    <a id="link-tracker" href="https://hireme-aryan.vercel.app/tracker" target="_blank" class="btn btn-primary">Open Opportunity Tracker →</a>
+    <a id="link-dashboard" href="https://hireme-aryan.vercel.app/dashboard" target="_blank" class="btn btn-secondary">Open Web Dashboard</a>
   </div>
 
   <script src="popup.js"></script>

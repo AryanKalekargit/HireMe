@@ -1,36 +1,17 @@
 // extension/popup.js
-// HireMe AI Extension Popup Controller – Supports Per-User Duplicate Alerts & Live Sync
+// HireMe AI Extension Popup Controller – Multi-Backend Sync & Bulletproof LinkedIn Extraction
 
-const API = 'https://hireme-aryan.vercel.app';
+const CANDIDATE_APIS = [
+  'http://localhost:3001',
+  'http://localhost:3000',
+  'https://hireme-aryan.vercel.app'
+];
+let activeApiUrl = 'https://hireme-aryan.vercel.app';
 let currentScrapedJob = null;
 
-// Helper: Read active user session directly from Chrome cookie jar
-async function getActiveUserSession() {
-  return new Promise((resolve) => {
-    try {
-      if (typeof chrome !== 'undefined' && chrome.cookies && chrome.cookies.get) {
-        chrome.cookies.get({ url: API, name: 'hireme_session' }, (cookie) => {
-          if (chrome.runtime?.lastError) {
-            resolve(null);
-            return;
-          }
-          if (cookie && cookie.value) {
-            try {
-              const user = JSON.parse(decodeURIComponent(cookie.value));
-              resolve(user);
-              return;
-            } catch {}
-          }
-          resolve(null);
-        });
-        setTimeout(() => resolve(null), 1000);
-      } else {
-        resolve(null);
-      }
-    } catch {
-      resolve(null);
-    }
-  });
+function cleanText(str) {
+  if (!str) return '';
+  return str.replace(/[\r\n\t]+/g, ' ').replace(/\s{2,}/g, ' ').trim();
 }
 
 function getScoreColor(score) {
@@ -45,11 +26,6 @@ function getMatchQualityLabel(score) {
   return 'Low Match / Skill Gap';
 }
 
-function cleanText(str) {
-  if (!str) return '';
-  return str.replace(/[\r\n\t]+/g, ' ').replace(/\s{2,}/g, ' ').trim();
-}
-
 function getCanonicalUrlFromTab(url) {
   try {
     const urlObj = new URL(url);
@@ -61,6 +37,62 @@ function getCanonicalUrlFromTab(url) {
   return url || 'https://www.linkedin.com/jobs/';
 }
 
+// ─── 0. Dynamic Backend Resolution ──────────────────────────────────────────
+async function resolveActiveBackend() {
+  // 1. Check open browser tabs for localhost or vercel
+  try {
+    if (typeof chrome !== 'undefined' && chrome.tabs && chrome.tabs.query) {
+      const allTabs = await chrome.tabs.query({});
+      for (const t of allTabs) {
+        if (!t.url) continue;
+        if (t.url.includes('localhost:3001')) return 'http://localhost:3001';
+        if (t.url.includes('localhost:3000')) return 'http://localhost:3000';
+      }
+    }
+  } catch {}
+
+  // 2. Check cookies across all candidate domains for active session
+  try {
+    if (typeof chrome !== 'undefined' && chrome.cookies && chrome.cookies.get) {
+      for (const domainUrl of CANDIDATE_APIS) {
+        const cookie = await new Promise((resolve) => {
+          chrome.cookies.get({ url: domainUrl, name: 'hireme_session' }, (c) => resolve(c));
+          setTimeout(() => resolve(null), 350);
+        });
+        if (cookie && cookie.value) {
+          return domainUrl;
+        }
+      }
+    }
+  } catch {}
+
+  return 'https://hireme-aryan.vercel.app';
+}
+
+async function getActiveUserSession(serverUrl) {
+  return new Promise((resolve) => {
+    try {
+      if (typeof chrome !== 'undefined' && chrome.cookies && chrome.cookies.get) {
+        chrome.cookies.get({ url: serverUrl, name: 'hireme_session' }, (cookie) => {
+          if (cookie && cookie.value) {
+            try {
+              const user = JSON.parse(decodeURIComponent(cookie.value));
+              resolve(user);
+              return;
+            } catch {}
+          }
+          resolve(null);
+        });
+        setTimeout(() => resolve(null), 600);
+      } else {
+        resolve(null);
+      }
+    } catch {
+      resolve(null);
+    }
+  });
+}
+
 // ─── 1. Check Server Auth & Load Lifetime Stats ──────────────────────────────
 async function loadServerStats() {
   const authBadge = document.getElementById('auth-badge');
@@ -68,14 +100,15 @@ async function loadServerStats() {
   const statScore = document.getElementById('stat-score');
 
   try {
-    const session = await getActiveUserSession();
+    activeApiUrl = await resolveActiveBackend();
+    const session = await getActiveUserSession(activeApiUrl);
     const reqHeaders = {};
     if (session?.userId) reqHeaders['x-user-id'] = session.userId;
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 6000);
+    const timeoutId = setTimeout(() => controller.abort(), 4000);
 
-    const res = await fetch(`${API}/api/extension-stats`, {
+    const res = await fetch(`${activeApiUrl}/api/extension-stats`, {
       headers: reqHeaders,
       credentials: 'include',
       signal: controller.signal,
@@ -86,11 +119,11 @@ async function loadServerStats() {
 
     if (!data.success) {
       if (authBadge) {
-        authBadge.textContent = '🔒 Sign in at hireme';
+        authBadge.textContent = '🔒 Sign in';
         authBadge.className = 'badge badge-purple';
         authBadge.style.color = '#f59e0b';
         authBadge.style.cursor = 'pointer';
-        authBadge.onclick = () => window.open(`${API}/login`, '_blank');
+        authBadge.onclick = () => window.open(`${activeApiUrl}/login`, '_blank');
       }
       if (statJobs) statJobs.textContent = '—';
       if (statScore) statScore.textContent = '—';
@@ -98,8 +131,14 @@ async function loadServerStats() {
     }
 
     if (authBadge) {
-      authBadge.innerHTML = '<span class="dot"></span>Connected';
+      const serverLabel = activeApiUrl.includes('localhost:3001')
+        ? 'Local :3001'
+        : activeApiUrl.includes('localhost:3000')
+        ? 'Local :3000'
+        : 'Connected';
+      authBadge.innerHTML = `<span class="dot"></span>${serverLabel}`;
       authBadge.className = 'badge badge-green';
+      authBadge.title = `Connected to ${activeApiUrl}`;
     }
 
     const { analyses, avgHireScore } = data.stats || {};
@@ -112,32 +151,54 @@ async function loadServerStats() {
     }
   } catch (err) {
     if (authBadge) {
-      authBadge.textContent = '⚠️ Offline / Unreachable';
+      authBadge.textContent = '● Offline Mode';
       authBadge.className = 'badge';
-      authBadge.style.color = '#f87171';
+      authBadge.style.color = '#94a3b8';
+      authBadge.style.cursor = 'pointer';
+      authBadge.onclick = () => loadServerStats();
     }
     if (statJobs) statJobs.textContent = '—';
     if (statScore) statScore.textContent = '—';
   }
 }
 
-// ─── 2. Inspect Active Tab & Detect LinkedIn Job ─────────────────────────────
+// ─── 2. Bulletproof LinkedIn Tab Detection & Extraction ─────────────────────
+async function getTargetTab() {
+  try {
+    let tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (!tabs || !tabs[0] || !tabs[0].url || tabs[0].url.startsWith('chrome-extension://')) {
+      tabs = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+    }
+    if (!tabs || !tabs[0] || !tabs[0].url || !tabs[0].url.includes('linkedin.com')) {
+      const linkedInTabs = await chrome.tabs.query({ url: '*://*.linkedin.com/*' });
+      if (linkedInTabs && linkedInTabs.length > 0) {
+        tabs = [linkedInTabs.find((t) => t.active) || linkedInTabs[0]];
+      }
+    }
+    return tabs && tabs[0] ? tabs[0] : null;
+  } catch {
+    return null;
+  }
+}
+
 async function checkActiveTab() {
   const tabPill = document.getElementById('tab-pill');
   const jobTitleEl = document.getElementById('scraped-job-title');
   const jobCompanyEl = document.getElementById('scraped-job-company');
   const evalBtn = document.getElementById('btn-evaluate-job');
 
-  if (!chrome.tabs || !chrome.tabs.query) {
+  if (typeof chrome === 'undefined' || !chrome.tabs || !chrome.tabs.query) {
     if (tabPill) tabPill.textContent = 'Extension Preview';
     return;
   }
 
   try {
-    const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    const activeTab = await getTargetTab();
 
     if (!activeTab || !activeTab.url) {
-      if (tabPill) tabPill.textContent = 'No Active Tab';
+      if (tabPill) tabPill.textContent = 'No Tab';
+      if (jobTitleEl) jobTitleEl.textContent = 'No Active Tab Detected';
+      if (jobCompanyEl) jobCompanyEl.textContent = 'Please switch to your browser window with LinkedIn.';
       return;
     }
 
@@ -159,64 +220,201 @@ async function checkActiveTab() {
       return;
     }
 
-    // Tab is on LinkedIn
+    // Active tab is LinkedIn!
     if (tabPill) {
       tabPill.innerHTML = '<span class="dot"></span>LinkedIn Open';
       tabPill.className = 'badge badge-green';
     }
 
-    // Instant Preview: Detect from URL & Tab Title so UI is never stuck on "Detecting..."
-    if (activeTab.title && (activeTab.title.includes('| LinkedIn') || activeTab.url.includes('/jobs/'))) {
-      fallbackUrlDetection(activeTab.url, activeTab.title);
+    // Tier 1: Instant Preview from URL & Document Title (0ms)
+    fallbackUrlDetection(activeTab.url, activeTab.title);
+
+    // Tier 2: Direct In-Tab DOM Extraction via chrome.scripting (Rock-solid, no message port drops)
+    try {
+      if (chrome.scripting && chrome.scripting.executeScript && activeTab.id) {
+        const results = await chrome.scripting.executeScript({
+          target: { tabId: activeTab.id },
+          func: inTabScrapeJobPosting,
+        });
+
+        if (results && results[0] && results[0].result && results[0].result.title) {
+          currentScrapedJob = results[0].result;
+          renderDetectedJob(currentScrapedJob);
+          return;
+        }
+      }
+    } catch (scriptErr) {
+      console.warn('[HireMe] Scripting DOM extraction fallback:', scriptErr);
     }
 
-    // Try messaging the content script for full details (description, location, etc.)
-    chrome.tabs.sendMessage(activeTab.id, { action: 'SCRAPE_JOB' }, async (response) => {
-      if (chrome.runtime.lastError || !response || !response.title) {
-        // Content script might not be injected yet on this tab, inject scraper scripts
-        try {
-          if (chrome.scripting && chrome.scripting.executeScript) {
-            await chrome.scripting.executeScript({
-              target: { tabId: activeTab.id },
-              files: [
-                'scraper/job-title.js',
-                'scraper/company.js',
-                'scraper/description.js',
-                'scraper/location.js',
-                'scraper/metadata.js',
-                'content.js'
-              ],
-            });
-
-            // Re-try message after injection
-            setTimeout(() => {
-              chrome.tabs.sendMessage(activeTab.id, { action: 'SCRAPE_JOB' }, (secondResp) => {
-                if (secondResp && secondResp.title) {
-                  currentScrapedJob = secondResp;
-                  renderDetectedJob(secondResp);
-                }
-              });
-            }, 300);
-          }
-        } catch (e) {
-          console.warn('Script injection error:', e);
+    // Tier 3: Content Script Messaging Fallback
+    if (activeTab.id) {
+      chrome.tabs.sendMessage(activeTab.id, { action: 'SCRAPE_JOB' }, (response) => {
+        if (!chrome.runtime.lastError && response && response.title) {
+          currentScrapedJob = response;
+          renderDetectedJob(response);
         }
-        return;
-      }
-
-      currentScrapedJob = response;
-      renderDetectedJob(response);
-    });
+      });
+    }
   } catch (err) {
-    console.error('Error querying tabs:', err);
+    console.error('[HireMe] Error checking active tab:', err);
   }
 }
 
-function fallbackUrlDetection(url, docTitle) {
-  const jobTitleEl = document.getElementById('scraped-job-title');
-  const jobCompanyEl = document.getElementById('scraped-job-company');
-  const evalBtn = document.getElementById('btn-evaluate-job');
+// Function injected directly into LinkedIn page context
+function inTabScrapeJobPosting() {
+  function clean(s) {
+    return (s || '').replace(/[\r\n\t]+/g, ' ').replace(/\s{2,}/g, ' ').trim();
+  }
 
+  function getJobId() {
+    try {
+      const p = new URLSearchParams(window.location.search);
+      const qId = p.get('currentJobId');
+      if (qId && /^\d+$/.test(qId)) return qId;
+      const match = window.location.pathname.match(/\/jobs\/view\/(\d+)/);
+      return match ? match[1] : null;
+    } catch {
+      return null;
+    }
+  }
+
+  const jobId = getJobId();
+
+  // 1. Extract Job Title
+  let title = '';
+  const titleSelectors = [
+    'div[data-view-name="job-details"] h1',
+    'section[aria-label="Primary content"] h1',
+    '.job-details-jobs-unified-top-card__job-title h1',
+    '.job-details-jobs-unified-top-card__job-title',
+    '.jobs-unified-top-card__job-title h1',
+    '.jobs-unified-top-card__job-title',
+    'main h1',
+    'h1[class*="job-title"]',
+    'h1'
+  ];
+
+  for (const s of titleSelectors) {
+    const el = document.querySelector(s);
+    if (el) {
+      const raw = clean(el.innerText || el.textContent);
+      const firstLine = raw.split(/\n/)[0].trim().replace(/\s*(?:verified|promoted|actively recruiting|easy apply)\s*$/i, '');
+      if (firstLine.length > 2 && firstLine.length < 120 && !/^(search|jobs|feed|messaging|notifications)$/i.test(firstLine)) {
+        title = firstLine;
+        break;
+      }
+    }
+  }
+
+  if (!title && jobId) {
+    const cardTitle = document.querySelector(`[data-job-id="${jobId}"] .job-card-list__title, a[href*="/jobs/view/${jobId}"]`);
+    if (cardTitle) title = clean(cardTitle.innerText || cardTitle.textContent);
+  }
+
+  if (!title && document.title && document.title.includes('| LinkedIn')) {
+    const pre = document.title.replace(/^\(\d+\+?\)\s*/, '').split('| LinkedIn')[0].trim();
+    title = clean(pre.split('|')[0] || pre);
+  }
+
+  // 2. Extract Company Name
+  let company = '';
+  const compSelectors = [
+    'div[data-view-name="job-details"] a[href*="/company/"]',
+    '.job-details-jobs-unified-top-card__company-name a',
+    '.job-details-jobs-unified-top-card__company-name',
+    '.jobs-unified-top-card__company-name a',
+    '.jobs-unified-top-card__company-name',
+    'a[href*="/company/"]',
+    'div[aria-label^="Company, "]'
+  ];
+
+  for (const s of compSelectors) {
+    const el = document.querySelector(s);
+    if (el) {
+      const aria = el.getAttribute('aria-label');
+      if (aria && aria.startsWith('Company, ')) {
+        company = clean(aria.replace('Company, ', ''));
+        break;
+      }
+      const raw = clean(el.innerText || el.textContent);
+      if (raw.length > 1 && raw.length < 80 && !/^(linkedin|search|jobs|company|about)$/i.test(raw)) {
+        company = raw;
+        break;
+      }
+    }
+  }
+
+  if (!company && document.title && document.title.includes('| LinkedIn')) {
+    const pre = document.title.replace(/^\(\d+\+?\)\s*/, '').split('| LinkedIn')[0].trim();
+    if (pre.includes('|')) {
+      const parts = pre.split('|').map(clean);
+      if (parts[1]) company = parts[1];
+    }
+  }
+
+  // 3. Extract Location & Workplace Type
+  let location = 'Remote / Hybrid';
+  const locSelectors = [
+    'div[aria-label^="Location, "]',
+    '.jobs-unified-top-card__bullet',
+    '.job-details-jobs-unified-top-card__primary-description span',
+    '.jobs-unified-top-card__primary-description span',
+    'span[class*="workplace-type"]'
+  ];
+
+  for (const s of locSelectors) {
+    const el = document.querySelector(s);
+    if (el) {
+      const aria = el.getAttribute('aria-label');
+      if (aria && aria.startsWith('Location, ')) {
+        location = clean(aria.replace('Location, ', ''));
+        break;
+      }
+      const raw = clean(el.innerText || el.textContent);
+      if (raw.length > 2 && raw.length < 80 && !/^(promoted|easy apply|apply)$/i.test(raw)) {
+        location = raw;
+        break;
+      }
+    }
+  }
+
+  // 4. Extract Job Description (Profile)
+  let description = '';
+  const descSelectors = [
+    '#job-details',
+    'div[data-view-name="job-details"]',
+    '.jobs-description__content',
+    '.jobs-description-content__text',
+    '.jobs-box__html-content',
+    'article.jobs-description__container',
+    '[data-testid="expandable-text-box"]'
+  ];
+
+  for (const s of descSelectors) {
+    const el = document.querySelector(s);
+    if (el) {
+      const text = (el.innerText || el.textContent || '').replace(/\r\n/g, '\n').trim();
+      if (text.length > 40) {
+        description = text.slice(0, 8000);
+        break;
+      }
+    }
+  }
+
+  const canonicalUrl = jobId ? `https://www.linkedin.com/jobs/view/${jobId}/` : window.location.href;
+
+  return {
+    title: title || 'LinkedIn Job Position',
+    company: company || 'Company on LinkedIn',
+    description,
+    location,
+    url: canonicalUrl,
+    source: 'linkedin',
+  };
+}
+
+function fallbackUrlDetection(url, docTitle) {
   let title = 'LinkedIn Job Position';
   let company = 'Company on LinkedIn';
   const canonicalUrl = getCanonicalUrlFromTab(url);
@@ -275,15 +473,15 @@ async function renderDetectedJob(job) {
       evalBtn.style.opacity = '1';
     }
 
-    // Check if ALREADY Evaluated by this specific logged-in user
+    // Check if ALREADY Evaluated by this user
     try {
-      const session = await getActiveUserSession();
+      const session = await getActiveUserSession(activeApiUrl);
       const reqHeaders = {};
       if (session?.userId) reqHeaders['x-user-id'] = session.userId;
 
       const canonicalUrl = job.url || getCanonicalUrlFromTab(window.location.href);
       const res = await fetch(
-        `${API}/api/analyze-job?url=${encodeURIComponent(canonicalUrl)}&title=${encodeURIComponent(job.title)}&company=${encodeURIComponent(job.company || '')}`,
+        `${activeApiUrl}/api/analyze-job?url=${encodeURIComponent(canonicalUrl)}&title=${encodeURIComponent(job.title)}&company=${encodeURIComponent(job.company || '')}`,
         {
           headers: reqHeaders,
           credentials: 'include',
@@ -316,17 +514,19 @@ async function handleEvaluateClick() {
   }
 
   try {
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    const tab = await getTargetTab();
 
-    if (tab?.id) {
-      await new Promise((resolve) => {
-        chrome.tabs.sendMessage(tab.id, { action: 'SCRAPE_JOB' }, (res) => {
-          if (res && res.title) {
-            currentScrapedJob = res;
-          }
-          resolve();
+    // Re-verify in-tab scraping if description was empty
+    if ((!currentScrapedJob?.description || currentScrapedJob.description.length < 20) && tab?.id) {
+      try {
+        const freshResults = await chrome.scripting.executeScript({
+          target: { tabId: tab.id },
+          func: inTabScrapeJobPosting,
         });
-      });
+        if (freshResults && freshResults[0]?.result?.title) {
+          currentScrapedJob = freshResults[0].result;
+        }
+      } catch {}
     }
 
     const title = currentScrapedJob?.title || 'Web Developer / Software Engineer';
@@ -346,11 +546,11 @@ async function handleEvaluateClick() {
       location,
     };
 
-    const session = await getActiveUserSession();
+    const session = await getActiveUserSession(activeApiUrl);
     const reqHeaders = { 'Content-Type': 'application/json' };
     if (session?.userId) reqHeaders['x-user-id'] = session.userId;
 
-    const res = await fetch(`${API}/api/analyze-job`, {
+    const res = await fetch(`${activeApiUrl}/api/analyze-job`, {
       method: 'POST',
       headers: reqHeaders,
       credentials: 'include',
@@ -360,7 +560,7 @@ async function handleEvaluateClick() {
     const data = await res.json();
 
     if (!res.ok || !data.success) {
-      alert(data.error || 'Failed to analyze job. Please make sure you are signed in at https://hireme-aryan.vercel.app');
+      alert(data.error || `Failed to analyze job. Please make sure you are signed in at ${activeApiUrl}`);
       if (evalBtn) {
         evalBtn.disabled = false;
         evalBtn.textContent = '✨ Retry Job Evaluation';
@@ -393,7 +593,7 @@ async function handleEvaluateClick() {
 
   } catch (err) {
     console.error('Analysis error:', err);
-    alert('Could not connect to HireMe server. Ensure https://hireme-aryan.vercel.app is accessible.');
+    alert(`Could not connect to HireMe server (${activeApiUrl}). Please check network connection.`);
     if (evalBtn) {
       evalBtn.disabled = false;
       evalBtn.textContent = '✨ Evaluate Current Job Posting';
@@ -473,14 +673,25 @@ function displayEvaluationResult(evalData, isExisting = false) {
   }
 }
 
-// ─── Initialization ─────────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
-  loadServerStats();
+// ─── 4. Non-Blocking Initialization ─────────────────────────────────────────
+function init() {
+  // Concurrently run tab detection and server stats so UI never blocks!
   checkActiveTab();
+  loadServerStats();
 
   const evalBtn = document.getElementById('btn-evaluate-job');
   if (evalBtn) {
     evalBtn.addEventListener('click', handleEvaluateClick);
+  }
+
+  const rescanBtn = document.getElementById('btn-rescan-tab');
+  if (rescanBtn) {
+    rescanBtn.addEventListener('click', () => {
+      rescanBtn.textContent = '⟳ Scanning…';
+      checkActiveTab().finally(() => {
+        setTimeout(() => { rescanBtn.textContent = '⟳ Rescan'; }, 400);
+      });
+    });
   }
 
   const copyBtn = document.getElementById('btn-copy-job-link');
@@ -493,4 +704,23 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
   }
-});
+
+  // Update footer links to point to active backend
+  const trackerLink = document.getElementById('link-tracker');
+  const dashboardLink = document.getElementById('link-dashboard');
+  if (trackerLink) {
+    trackerLink.href = `${activeApiUrl}/tracker`;
+    trackerLink.onclick = () => { window.open(`${activeApiUrl}/tracker`, '_blank'); return false; };
+  }
+  if (dashboardLink) {
+    dashboardLink.href = `${activeApiUrl}/dashboard`;
+    dashboardLink.onclick = () => { window.open(`${activeApiUrl}/dashboard`, '_blank'); return false; };
+  }
+}
+
+// Ensure execution whether DOM is loading or already interactive/complete!
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
