@@ -34,7 +34,7 @@ export default function SettingsPage() {
             <div className="flex-1 flex flex-col min-w-0">
                 <Header title="Account & Extension Settings" />
 
-                <main className="p-6 space-y-6 max-w-7xl mx-auto w-full">
+                <main className="p-4 sm:p-6 space-y-6 max-w-7xl mx-auto w-full">
                     {savedNotice && (
                         <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold flex items-center gap-2">
                             <span className="material-symbols-outlined text-sm">check_circle</span>
@@ -45,7 +45,7 @@ export default function SettingsPage() {
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         {/* Profile Settings */}
                         <div className="lg:col-span-2 space-y-6">
-                            <div className="glass-card rounded-2xl p-6 border border-white/5 space-y-5">
+                            <div className="glass-card rounded-2xl p-4 sm:p-6 border border-white/5 space-y-5">
                                 <div className="flex items-center gap-2 pb-3 border-b border-white/5">
                                     <span className="material-symbols-outlined text-primary text-xl">manage_accounts</span>
                                     <h3 className="font-bold text-base text-white">Account Details</h3>
@@ -102,7 +102,7 @@ export default function SettingsPage() {
                             </div>
 
                             {/* Automation & Notification Preferences */}
-                            <div className="glass-card rounded-2xl p-6 border border-white/5 space-y-4">
+                            <div className="glass-card rounded-2xl p-4 sm:p-6 border border-white/5 space-y-4">
                                 <div className="flex items-center gap-2 pb-3 border-b border-white/5">
                                     <span className="material-symbols-outlined text-secondary text-xl">tune</span>
                                     <h3 className="font-bold text-base text-white">Assistant Behavior</h3>
@@ -140,7 +140,7 @@ export default function SettingsPage() {
 
                         {/* Chrome Extension Status Card */}
                         <div className="space-y-6">
-                            <div className="glass-card rounded-2xl p-6 border border-white/5 space-y-4">
+                            <div className="glass-card rounded-2xl p-4 sm:p-6 border border-white/5 space-y-4">
                                 <div className="flex items-center gap-2">
                                     <span className="material-symbols-outlined text-amber-400 text-xl">extension</span>
                                     <h3 className="font-bold text-base text-white">Chrome Extension</h3>

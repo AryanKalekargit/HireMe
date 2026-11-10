@@ -130,7 +130,7 @@ export default function AnalyticsPage() {
             <div className="flex-1 flex flex-col min-w-0">
                 <Header title="Analytics & Pipeline Insights" />
 
-                <main className="p-6 space-y-6 max-w-7xl mx-auto w-full">
+                <main className="p-4 sm:p-6 space-y-6 max-w-7xl mx-auto w-full">
                     {/* Top Controls Banner */}
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 glass-card p-5 rounded-2xl border border-white/5">
                         <div>
@@ -251,7 +251,7 @@ export default function AnalyticsPage() {
                     {/* SEPARATE EVALUATION CARDS: LINKEDIN VS DIRECT JD */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         {/* 1. LINKEDIN EVALUATED JOBS CARD */}
-                        <div className="glass-card rounded-2xl p-6 border border-sky-500/20 relative space-y-4 bg-gradient-to-br from-sky-950/20 via-surface-container to-surface-container-low">
+                        <div className="glass-card rounded-2xl p-4 sm:p-6 border border-sky-500/20 relative space-y-4 bg-gradient-to-br from-sky-950/20 via-surface-container to-surface-container-low">
                             <div className="flex items-center justify-between pb-3 border-b border-white/5">
                                 <div className="flex items-center gap-2.5">
                                     <div className="w-8 h-8 rounded-lg bg-[#0077b5]/20 border border-[#0077b5]/30 flex items-center justify-center text-[#38bdf8] font-bold text-sm">
@@ -337,7 +337,7 @@ export default function AnalyticsPage() {
                         </div>
 
                         {/* 2. DIRECT JD MATCHED JOBS CARD */}
-                        <div className="glass-card rounded-2xl p-6 border border-indigo-500/20 relative space-y-4 bg-gradient-to-br from-indigo-950/20 via-surface-container to-surface-container-low">
+                        <div className="glass-card rounded-2xl p-4 sm:p-6 border border-indigo-500/20 relative space-y-4 bg-gradient-to-br from-indigo-950/20 via-surface-container to-surface-container-low">
                             <div className="flex items-center justify-between pb-3 border-b border-white/5">
                                 <div className="flex items-center gap-2.5">
                                     <div className="w-8 h-8 rounded-lg bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-primary font-bold text-sm">
@@ -419,7 +419,7 @@ export default function AnalyticsPage() {
                     {/* REFINED PIPELINE PROGRESSION & SKILL GAPS */}
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         {/* Application Stage Breakdown - MINIMAL & AESTHETIC */}
-                        <div className="lg:col-span-2 glass-card rounded-2xl p-6 border border-white/5 space-y-5 bg-gradient-to-b from-surface-container to-surface-container-low">
+                        <div className="lg:col-span-2 glass-card rounded-2xl p-4 sm:p-6 border border-white/5 space-y-5 bg-gradient-to-b from-surface-container to-surface-container-low">
                             <div className="flex items-center justify-between pb-3 border-b border-white/5">
                                 <div className="flex items-center gap-2">
                                     <span className="material-symbols-outlined text-primary text-xl">waterfall_chart</span>
@@ -458,7 +458,7 @@ export default function AnalyticsPage() {
                         </div>
 
                         {/* Top Missing Skills Frequency - MINIMAL & AESTHETIC */}
-                        <div className="glass-card rounded-2xl p-6 border border-white/5 space-y-4 bg-gradient-to-b from-surface-container to-surface-container-low">
+                        <div className="glass-card rounded-2xl p-4 sm:p-6 border border-white/5 space-y-4 bg-gradient-to-b from-surface-container to-surface-container-low">
                             <div className="flex items-center justify-between pb-3 border-b border-white/5">
                                 <div className="flex items-center gap-2">
                                     <span className="material-symbols-outlined text-amber-400 text-xl">auto_fix_high</span>

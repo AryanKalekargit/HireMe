@@ -264,7 +264,7 @@ export default function ProfilePage() {
             <div className="flex-1 flex flex-col min-w-0">
                 <Header title="Resume & Candidate Profile" />
 
-                <main className="p-6 space-y-6 max-w-7xl mx-auto w-full">
+                <main className="p-4 sm:p-6 space-y-6 max-w-7xl mx-auto w-full">
                     {saveSuccess && (
                         <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold flex items-center gap-2 animate-fade-in">
                             <span className="material-symbols-outlined text-sm">verified</span>
@@ -276,7 +276,7 @@ export default function ProfilePage() {
                         {/* Left 2 Columns: Resume Upload & Dual Skillsets */}
                         <div className="lg:col-span-2 space-y-6">
                             {/* Resume Upload Dropzone Card */}
-                            <div className="glass-card rounded-2xl p-6 border border-white/10">
+                            <div className="glass-card rounded-2xl p-4 sm:p-6 border border-white/10">
                                 <div className="flex items-center gap-2 mb-2">
                                     <span className="material-symbols-outlined text-primary text-xl">upload_file</span>
                                     <h3 className="font-bold text-lg text-white">Upload Resume PDF</h3>
@@ -330,7 +330,7 @@ export default function ProfilePage() {
                             </div>
 
                             {/* 1. TECHNICAL SKILLS SECTION */}
-                            <div className="glass-card rounded-2xl p-6 border border-white/10 space-y-4">
+                            <div className="glass-card rounded-2xl p-4 sm:p-6 border border-white/10 space-y-4">
                                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-white/5">
                                     <div className="flex items-center gap-2">
                                         <span className="material-symbols-outlined text-primary text-xl">code</span>
@@ -437,7 +437,7 @@ export default function ProfilePage() {
                             </div>
 
                             {/* 2. PERSONALITY DEVELOPMENT & SOFT SKILLS SECTION */}
-                            <div className="glass-card rounded-2xl p-6 border border-white/10 space-y-4">
+                            <div className="glass-card rounded-2xl p-4 sm:p-6 border border-white/10 space-y-4">
                                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-white/5">
                                     <div className="flex items-center gap-2">
                                         <span className="material-symbols-outlined text-emerald-400 text-xl">psychology</span>
@@ -526,7 +526,7 @@ export default function ProfilePage() {
                         </div>
 
                         {/* Right Column: Candidate Profile Settings */}
-                        <div className="glass-card rounded-2xl p-6 border border-white/10 space-y-6 h-fit sticky top-6">
+                        <div className="glass-card rounded-2xl p-4 sm:p-6 border border-white/10 space-y-6 h-fit lg:sticky lg:top-6">
                             <div className="flex items-center gap-2 pb-4 border-b border-white/5">
                                 <span className="material-symbols-outlined text-primary text-xl">person</span>
                                 <h3 className="font-bold text-base text-white">Candidate Details</h3>

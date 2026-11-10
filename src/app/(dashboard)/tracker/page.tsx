@@ -302,7 +302,7 @@ export default function OpportunityTrackerPage() {
             <div className="flex-1 flex flex-col min-w-0">
                 <Header title="Opportunity Tracker" />
 
-                <main className="p-6 space-y-6 max-w-7xl mx-auto w-full">
+                <main className="p-4 sm:p-6 space-y-6 max-w-7xl mx-auto w-full">
                     {/* Live Dynamic Stats Bar */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         <div className="glass-card rounded-2xl p-4 border border-white/5 flex items-center justify-between">
@@ -424,7 +424,7 @@ export default function OpportunityTrackerPage() {
 
                     {/* TABLE VIEW */}
                     {viewMode === 'table' && (
-                        <div className="glass-card rounded-2xl p-6 border border-white/5">
+                        <div className="glass-card rounded-2xl p-4 sm:p-6 border border-white/5">
                             <div className="overflow-x-auto">
                                 <table className="w-full text-left text-xs text-slate-300">
                                     <thead className="bg-surface-container-high text-slate-400 uppercase font-semibold text-[10px] border-b border-white/5">
@@ -679,7 +679,7 @@ export default function OpportunityTrackerPage() {
                     {/* JOB DEEP-DIVE MODAL */}
                     {selectedJob && (
                         <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
-                            <div className="glass-card bg-surface-container-low border border-white/10 rounded-2xl max-w-2xl w-full p-6 space-y-5 max-h-[90vh] overflow-y-auto">
+                            <div className="glass-card bg-surface-container-low border border-white/10 rounded-2xl max-w-2xl w-full p-4 sm:p-6 space-y-5 max-h-[90vh] overflow-y-auto">
                                 <div className="flex items-start justify-between border-b border-white/5 pb-4">
                                     <div>
                                         <div className="inline-flex items-center gap-2 mb-1">
@@ -965,7 +965,7 @@ export default function OpportunityTrackerPage() {
                     {/* ADD OPPORTUNITY MODAL */}
                     {showAddModal && (
                         <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
-                            <div className="glass-card bg-surface-container-low border border-white/10 rounded-2xl max-w-lg w-full p-6 space-y-4">
+                            <div className="glass-card bg-surface-container-low border border-white/10 rounded-2xl max-w-lg w-full p-4 sm:p-6 space-y-4 max-h-[90vh] overflow-y-auto">
                                 <div className="flex items-center justify-between border-b border-white/5 pb-3">
                                     <h3 className="font-bold text-base text-white">Add Job Opportunity</h3>
                                     <button onClick={() => setShowAddModal(false)} className="text-slate-400 hover:text-white">

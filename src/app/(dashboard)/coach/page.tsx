@@ -85,7 +85,7 @@ export default function CoachPage() {
             <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
                 <Header title="AI Career Coach" />
 
-                <main className="flex-1 p-6 flex flex-col min-h-0 max-w-7xl mx-auto w-full space-y-4">
+                <main className="flex-1 p-4 sm:p-6 flex flex-col min-h-0 max-w-7xl mx-auto w-full space-y-4">
                     {/* Top Mode Selector Bar */}
                     <div className="glass-card p-4 rounded-2xl border border-white/5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shrink-0">
                         <div className="flex items-center gap-2 overflow-x-auto scrollbar-none w-full sm:w-auto">
@@ -121,7 +121,7 @@ export default function CoachPage() {
                     </div>
 
                     {/* Chat Messages Column */}
-                    <div className="flex-1 glass-card rounded-2xl p-6 border border-white/5 flex flex-col min-h-0 overflow-hidden">
+                    <div className="flex-1 glass-card rounded-2xl p-4 sm:p-6 border border-white/5 flex flex-col min-h-0 overflow-hidden">
                         <div className="flex-1 overflow-y-auto space-y-4 pr-2">
                             {messages.map((msg) => (
                                 <div

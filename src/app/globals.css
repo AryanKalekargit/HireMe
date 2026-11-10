@@ -50,6 +50,21 @@
   vertical-align: middle;
 }
 
+@keyframes drawerSlideIn {
+  from {
+    transform: translateX(-100%);
+    opacity: 0.6;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-drawer-in {
+  animation: drawerSlideIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;

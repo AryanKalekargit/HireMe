@@ -1,0 +1,93 @@
+{
+  "name": "HireMe - AI Job Search Assistant",
+  "short_name": "HireMe",
+  "description": "AI-Powered Job Compatibility Scoring, Real-Time Skill Gap Detection, and Opportunity Tracking.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0c1322",
+  "theme_color": "#4f46e5",
+  "orientation": "portrait-primary",
+  "lang": "en",
+  "dir": "ltr",
+  "categories": [
+    "productivity",
+    "business",
+    "utilities"
+  ],
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "Match overview and instant analyzer",
+      "url": "/dashboard",
+      "icons": [
+        {
+          "src": "/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Opportunity Tracker",
+      "short_name": "Tracker",
+      "description": "Track pipeline and saved job opportunities",
+      "url": "/tracker",
+      "icons": [
+        {
+          "src": "/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Profile & Skills",
+      "short_name": "Profile",
+      "description": "Manage technical & personality skills",
+      "url": "/profile",
+      "icons": [
+        {
+          "src": "/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "AI Career Coach",
+      "short_name": "Coach",
+      "description": "Interview prep and salary negotiation",
+      "url": "/career-coach",
+      "icons": [
+        {
+          "src": "/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
+}

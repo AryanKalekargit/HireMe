@@ -179,9 +179,9 @@ export default function DashboardPage() {
             <div className="flex-1 flex flex-col min-w-0">
                 <Header title="Dashboard Overview" />
 
-                <main className="p-6 space-y-6 max-w-7xl mx-auto w-full">
+                <main className="p-4 sm:p-6 space-y-6 max-w-7xl mx-auto w-full">
                     {/* Welcome & Profile Identity Banner */}
-                    <div className="glass-panel rounded-2xl p-6 border border-white/10 relative overflow-hidden bg-gradient-to-r from-indigo-950/70 via-slate-900 to-surface-container">
+                    <div className="glass-panel rounded-2xl p-4 sm:p-6 border border-white/10 relative overflow-hidden bg-gradient-to-r from-indigo-950/70 via-slate-900 to-surface-container">
                         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
                             <div className="flex items-start sm:items-center gap-4">
                                 <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-indigo-500 to-emerald-400 p-0.5 shadow-xl shrink-0">
@@ -218,7 +218,7 @@ export default function DashboardPage() {
                                 </div>
                             </div>
 
-                            <div className="flex items-center gap-3 shrink-0">
+                            <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 shrink-0">
                                 <Link
                                     href="/profile"
                                     className="bg-white/10 hover:bg-white/20 text-white text-xs font-semibold px-4 py-2.5 rounded-xl border border-white/10 transition-colors flex items-center gap-1.5"
@@ -305,7 +305,7 @@ export default function DashboardPage() {
 
                     {/* Quick Job Match Analyzer Section */}
                     <div id="quick-analyze" className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        <div className="lg:col-span-2 glass-card rounded-2xl p-6 border border-white/10">
+                        <div className="lg:col-span-2 glass-card rounded-2xl p-4 sm:p-6 border border-white/10">
                             <div className="flex items-center gap-2 mb-2">
                                 <span className="material-symbols-outlined text-primary text-xl">auto_awesome</span>
                                 <h3 className="font-bold text-lg text-white">Instant Job Match Analyzer</h3>
@@ -356,7 +356,7 @@ export default function DashboardPage() {
 
                                 {/* Resume Source Switcher */}
                                 <div className="p-3 rounded-xl bg-surface-container-high/60 border border-white/5 space-y-2">
-                                    <div className="flex items-center justify-between">
+                                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
                                         <span className="text-[11px] font-semibold text-slate-300">Resume for Compatibility Evaluation:</span>
                                         <div className="flex items-center gap-1 bg-surface-container-low p-0.5 rounded-lg border border-white/5 text-[10px]">
                                             <button
@@ -420,7 +420,7 @@ export default function DashboardPage() {
                         </div>
 
                         {/* Analysis Output Result Card */}
-                        <div className="glass-card rounded-2xl p-6 border border-white/10 flex flex-col justify-between">
+                        <div className="glass-card rounded-2xl p-4 sm:p-6 border border-white/10 flex flex-col justify-between">
                             <div>
                                 <h4 className="font-bold text-sm text-white mb-4 flex items-center justify-between">
                                     <span>Match Analysis Output</span>
@@ -605,7 +605,7 @@ export default function DashboardPage() {
                     </div>
 
                     {/* Recent Analyses Table */}
-                    <div className="glass-card rounded-2xl p-6 border border-white/5">
+                    <div className="glass-card rounded-2xl p-4 sm:p-6 border border-white/5">
                         <div className="flex items-center justify-between mb-4">
                             <h3 className="font-bold text-base text-white">Recent Analyses</h3>
                             <Link href="/tracker" className="text-xs text-primary font-semibold hover:underline">
