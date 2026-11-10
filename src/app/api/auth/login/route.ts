@@ -84,13 +84,13 @@ export async function POST(req: Request) {
         }
 
         if (!matchedUser) {
+            const isWhitelistError = ((global as any).__lastMongoError || '').toLowerCase().includes('whitelist');
             return NextResponse.json(
                 {
                     success: false,
-                    error: 'Account not found. Please click Create account first to sign up.',
-                    dbConnected: isMongoConnected(),
-                    dbState: mongoose.connection.readyState,
-                    dbError: (global as any).__lastMongoError || null
+                    error: isWhitelistError
+                        ? 'MongoDB Atlas Network Access blocked this connection. Please add 0.0.0.0/0 to your MongoDB Atlas IP Access List (under Network Access tab) to allow Vercel.'
+                        : 'Account not found. Please click Create account first to sign up.',
                 },
                 { status: 404 }
             );
