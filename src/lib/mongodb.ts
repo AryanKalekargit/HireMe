@@ -1,7 +1,19 @@
 import mongoose from 'mongoose';
 
 const DEFAULT_MONGODB_URI = 'mongodb+srv://aryankalekar9217_db_user:ILWe6Nt7mdV83lHR@cluster0.bkgxmo3.mongodb.net/hireme?retryWrites=true&w=majority';
-const MONGODB_URI = process.env.MONGODB_URI || DEFAULT_MONGODB_URI;
+
+function getMongoUri(): string {
+    let raw = (process.env.MONGODB_URI || '').trim();
+    if ((raw.startsWith('"') && raw.endsWith('"')) || (raw.startsWith("'") && raw.endsWith("'"))) {
+        raw = raw.slice(1, -1).trim();
+    }
+    if (raw.startsWith('mongodb://') || raw.startsWith('mongodb+srv://')) {
+        return raw;
+    }
+    return DEFAULT_MONGODB_URI;
+}
+
+const MONGODB_URI = getMongoUri();
 
 interface MongooseCache {
     conn: typeof mongoose | null;
