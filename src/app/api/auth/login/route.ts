@@ -15,9 +15,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ success: false, error: 'Valid email required' }, { status: 400 });
         }
 
-        const conn = await connectToDatabase();
-        const mongoState = mongoose.connection.readyState;
-        const mongoErr = (global as any).__lastMongoError || null;
+        await connectToDatabase();
 
         let matchedUser: any = null;
 
